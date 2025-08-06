@@ -31,7 +31,7 @@ class AppRouter {
               if (product == null) {
                 return ErrorScreen();
               } else {
-                return ProductScreen(product: product);
+                return ProductScreen(listState: listState!, product: product);
               }
             },
           ),

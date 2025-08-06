@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:get_it/get_it.dart';
@@ -9,7 +10,7 @@ import 'package:test_task/core/repository/product_repository.dart';
 part 'global_state.g.dart';
 
 class GlobalState extends _GlobalState with _$GlobalState {
-  static const errorViewPeriod = 5;
+  static const errorViewPeriod = 10;
 }
 
 abstract class _GlobalState with Store {
@@ -17,6 +18,7 @@ abstract class _GlobalState with Store {
   String? error;
 
   bool _hasConnectionProblem = false;
+  Timer? _networkStateUpdater, _errorHider;
   final _rnd = Random();
   final NetworkRepository _networkRepository = NetworkRepository();
 
@@ -30,27 +32,33 @@ abstract class _GlobalState with Store {
       _hasConnectionProblem = true;
       GetIt.instance.unregister<ProductRepository>();
       GetIt.instance.registerSingleton<ProductRepository>(LocalRepository());
-      Future.delayed(Duration(seconds: _rnd.nextInt(60))).then((_) {
+      _networkStateUpdater = Timer(Duration(seconds: _rnd.nextInt(60)), () {
         checkBackendAvailability();
       });
     }
   }
 
-  Future<void> checkBackendAvailability() async {
+  Future<bool> checkBackendAvailability() async {
     final result = await _networkRepository.checkBackendAvailable();
     if (result) {
       _hasConnectionProblem = false;
       GetIt.instance.unregister<ProductRepository>();
       GetIt.instance.registerSingleton<ProductRepository>(_networkRepository);
     }
+    return result;
   }
 
   void setError(String err) {
     error = err;
-    Future.delayed(Duration(seconds: GlobalState.errorViewPeriod)).then((_) {
+    _errorHider = Timer(Duration(seconds: GlobalState.errorViewPeriod), () {
       if (error == err) {
         error = null;
       }
     });
+  }
+
+  void dispose() {
+    _networkStateUpdater?.cancel();
+    _errorHider?.cancel();
   }
 }

@@ -26,6 +26,7 @@ class _MainAppState extends State<MainApp> {
   void initState() {
     storage = SqliteStorage();
     GetIt.instance.registerSingleton(storage);
+    GetIt.instance.registerSingleton(_globalState);
     errorToastViewer = reaction((_) => _globalState.error?.isNotEmpty ?? false, (_) {
       if (_globalState.error == null) return;
       toastification.show(
@@ -41,6 +42,7 @@ class _MainAppState extends State<MainApp> {
   @override
   void dispose() {
     storage.close();
+    _globalState.dispose();
     errorToastViewer.call();
     super.dispose();
   }

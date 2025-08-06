@@ -25,11 +25,9 @@ dependencies:
   #UI
   cupertino_icons: ^1.0.8
   getwidget: ^6.0.0
-  loading_animation_widget: ^1.3.0
   toastification: ^2.3.0
 
   #other
-  dio: ^5.8.0+1
   http: ^1.4.0
   go_router: ^16.1.0
   json_serializable: ^6.9.0

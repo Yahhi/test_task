@@ -19,21 +19,34 @@ class ListScreen extends StatelessWidget {
         title: const Text("Products"),
         centerTitle: true,
         backgroundColor: Colors.blue,
-        actions: [IconButton(onPressed: state.changeOrder, icon: Icon(Icons.sort))],
+        actions: [
+          Observer(
+            builder: (_) => IconButton(
+              onPressed: state.changeOrder,
+              icon: Icon(
+                Icons.sort,
+                color: state.isOrdered ? Theme.of(context).secondaryHeaderColor : Theme.of(context).primaryColor,
+              ),
+            ),
+          ),
+        ],
       ),
-      body: Observer(
-        builder: (_) {
-          if (state.isLoading) {
-            return const Center(child: GFLoader(type: GFLoaderType.circle));
-          } else {
-            return ListView.builder(
-              itemCount: state.products.length,
-              itemBuilder: (context, index) {
-                return ProductCard(product: state.products[index]);
-              },
-            );
-          }
-        },
+      body: RefreshIndicator(
+        onRefresh: state.load,
+        child: Observer(
+          builder: (_) {
+            if (state.isLoading) {
+              return const Center(child: GFLoader(type: GFLoaderType.circle));
+            } else {
+              return ListView.builder(
+                itemCount: state.products.length,
+                itemBuilder: (context, index) {
+                  return ProductCard(key: ValueKey(state.products[index].id), product: state.products[index]);
+                },
+              );
+            }
+          },
+        ),
       ),
     );
   }
